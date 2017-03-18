@@ -71,10 +71,11 @@ class Vaisseau(pygame.sprite.Sprite, ConnectionListener):
 
     def Network_vaisseau(self,data):
         self.image = self.image_n
-        self.rect.center = data['vaisseau' + str(self.number)][0:2]
-
-    #def Network_shots(self,data):
-        #self.shot_group.add(Shot(data['shots'][0:2], 'n'))
+        if data['vaisseau' + str(self.number)] == "kill":
+            print("mort")
+            self.kill()
+        else:
+            self.rect.center = data['vaisseau' + str(self.number)][0:2]
 
     def update(self):
         self.Pump()
@@ -165,8 +166,6 @@ if __name__ == '__main__':
     wait_rect.center = [ SCREEN_WIDTH/2, SCREEN_HEIGHT/2 ]
     screen.blit(background_image, background_rect)
     vaisseau_sprite = pygame.sprite.RenderClear()
-    #chicken_sprite = pygame.sprite.RenderClear()
-    #chicken_sprite.add(Chicken())
     vaisseau_sprite.add(Vaisseau(1))
     vaisseau_sprite.add(Vaisseau(2))
     shot_group = SpriteGroup('shots')
@@ -189,15 +188,12 @@ if __name__ == '__main__':
 
             # updates
             vaisseau_sprite.update()
-            #chicken_sprite.update()
             shot_group.update()
             chicken_group.update()
 
             # drawings
             vaisseau_sprite.clear(screen, background_image)
             vaisseau_sprite.draw(screen)
-            #chicken_sprite.clear(screen, background_image)
-            #chicken_sprite.draw(screen)
             shot_group.clear(screen, background_image)
             shot_group.draw(screen)
             chicken_group.clear(screen, background_image)

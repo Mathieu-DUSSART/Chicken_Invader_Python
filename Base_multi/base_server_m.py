@@ -39,24 +39,32 @@ class Vaisseau(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.shot_group = pygame.sprite.RenderClear()
         self.image, self.rect = load_png('Pics/soldier_n.png')
+        self.life = 3
+        self.dead = False
+
         if number == 1:
             self.rect.center = [SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT/2]
         elif number == 2:
             self.rect.center = [SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT/2]
 
     def update(self, keys):
-        if keys[K_UP]:
-            if self.rect.center[1] >= 0:
-                self.rect = self.rect.move([0,-10])
-        elif keys[K_DOWN]:
-            if self.rect.center[1] <= SCREEN_HEIGHT:
-                self.rect = self.rect.move([0,10])
-        elif keys[K_LEFT]:
-            if self.rect.center[0] >= 0:
-                self.rect = self.rect.move([-10,0])
-        elif keys[K_RIGHT]:
-            if self.rect.center[0] <= SCREEN_WIDTH:
-                self.rect = self.rect.move([10,0])
+        if self.dead == False:
+            if keys[K_UP]:
+                if self.rect.center[1] >= 0:
+                    self.rect = self.rect.move([0,-10])
+            elif keys[K_DOWN]:
+                if self.rect.center[1] <= SCREEN_HEIGHT:
+                    self.rect = self.rect.move([0,10])
+            elif keys[K_LEFT]:
+                if self.rect.center[0] >= 0:
+                    self.rect = self.rect.move([-10,0])
+            elif keys[K_RIGHT]:
+                if self.rect.center[0] <= SCREEN_WIDTH:
+                    self.rect = self.rect.move([10,0])
+
+    def killVaisseau(self):
+        self.dead = True
+        self.kill()
 
 class Chicken(pygame.sprite.Sprite):
     """Class for the player"""
@@ -85,12 +93,12 @@ class Shot(pygame.sprite.Sprite):
     '''
     The player's shots
     '''
-    def __init__(self,center,orientation):
+    def __init__(self,center,orientation,speed):
         pygame.sprite.Sprite.__init__(self)
         self.image,self.rect=load_png("Pics/shot.png")
         self.rect.center = center
         speeds = {'nw':[-1,-1], 'ne':[1,-1], 'n':[0,-1], 'sw':[-1,1], 'se':[1,1], 's':[0,1], 'w':[-1,0], 'e':[1,0]}
-        self.vector = [15 * x for x in speeds[orientation]]
+        self.vector = [speed * x for x in speeds[orientation]]
 
     def update(self):
         self.rect=self.rect.move(self.vector)
@@ -123,33 +131,26 @@ class ClientChannel(Channel):
             self.shooting -= 1
         if keys[K_SPACE]:
             if self.shooting == 0:
-                self.shot_group.add(Shot(self.vaisseau.rect.center, 'n'))
+                self.shot_group.add(Shot(self.vaisseau.rect.center, 'n', 15))
                 self.shooting = 12
         self.vaisseau.update(keys)
 
     def update(self, chicken_group):
         self.shot_group.update()
-        #self.send_shots()
 
-        pygame.sprite.groupcollide(chicken_group, self.shot_group, True, True, pygame.sprite.collide_circle_ratio(0.7))
+        pygame.sprite.groupcollide(chicken_group, self.shot_group, True, True, pygame.sprite.collide_circle_ratio(0.85))
         #collision = pygame.sprite.spritecollide(self.vaisseau, chicken_group, False, pygame.sprite.collide_circle_ratio(0.5))
 
         self.send_chickens(chicken_group)
 
 
     def send_chickens(self, chicken_group):
-        #chicken1 = self.clients[0].chicken
-        #message1 = [ chicken1.rect.centerx, chicken1.rect.centery ]
         chickens = []
         for chicken in chicken_group.sprites():
             chickens.append([chicken.rect.centerx, chicken.rect.centery])
 
-
         self.Send({"action":'chickens', 'chickens': chickens})
 
-
-        #for client in self.clients:
-        #    client.Send({'action':'chicken', 'vaisseau':message1})
 
 
 # SERVER
@@ -163,6 +164,7 @@ class MyServer(Server):
         self.run = False
         pygame.init()
         self.shot_group = pygame.sprite.RenderClear()
+
         self.screen = pygame.display.set_mode((128, 128))
         print('Server launched')
 
@@ -185,12 +187,37 @@ class MyServer(Server):
 
     # SENDING FUNCTIONS
     def send_vaisseaux(self):
+        message1 = ""
+        message2 = ""
         vaisseau1 = self.clients[0].vaisseau
-        self.shot1 = self.clients[0].shot_group
-        message1 = [ vaisseau1.rect.centerx, vaisseau1.rect.centery ]
         vaisseau2 = self.clients[1].vaisseau
+
+        self.shot1 = self.clients[0].shot_group
         self.shot2 = self.clients[1].shot_group
-        message2 = [ vaisseau2.rect.centerx, vaisseau2.rect.centery ]
+
+        collision = pygame.sprite.spritecollide(vaisseau1, self.shot_group, True, pygame.sprite.collide_circle_ratio(0.8))
+        collision2 = pygame.sprite.spritecollide(vaisseau2, self.shot_group, True, pygame.sprite.collide_circle_ratio(0.8))
+
+        if len(collision) != 0:
+            vaisseau1.life -= 1
+            if vaisseau1.life == 0:
+                vaisseau1.killVaisseau()
+                message1 = "kill"
+
+        if len(message1) == 0:
+            message1 = [ vaisseau1.rect.centerx, vaisseau1.rect.centery ]
+
+
+        if len(collision2) != 0:
+            vaisseau2.life -= 1
+            if vaisseau2.life == 0:
+                vaisseau2.killVaisseau()
+                message2 = "kill"
+
+        if len(message2) == 0:
+            message2 = [ vaisseau2.rect.centerx, vaisseau2.rect.centery ]
+
+
 
         for client in self.clients:
             client.Send({'action':'vaisseau', 'vaisseau1':message1, 'vaisseau2':message2})
@@ -202,6 +229,8 @@ class MyServer(Server):
         for shot in self.shot1:
             shots.append(shot.rect.center)
         for shot in self.shot2:
+            shots.append(shot.rect.center)
+        for shot in self.shot_group:
             shots.append(shot.rect.center)
         for client in self.clients:
             client.Send({"action":'shots', 'shots': shots})
@@ -240,7 +269,15 @@ class MyServer(Server):
                 if test < 25:
                     self.chicken_group.add(Chicken())
                     test = test + 1
+
+
+                for chicken in self.chicken_group:
+                    egg = random.randint(1, 4000)
+                    if egg == 42:
+                        self.shot_group.add(Shot(chicken.rect.center, 's', 1))
                 self.send_shots()
+                self.shot_group.update()
+
 
             pygame.display.flip()
 
