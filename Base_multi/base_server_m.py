@@ -89,6 +89,9 @@ class Chicken(pygame.sprite.Sprite):
         #self.Pump()
         ''' '''
 
+    def __del__(self):
+        ClientChannel.score += 10
+
 class Shot(pygame.sprite.Sprite):
     '''
     The player's shots
@@ -110,6 +113,7 @@ class Shot(pygame.sprite.Sprite):
 
 # PODSIXNET *********************
 class ClientChannel(Channel):
+    score = 0
 
     def __init__(self, *args, **kwargs):
         Channel.__init__(self, *args, **kwargs)
@@ -142,6 +146,7 @@ class ClientChannel(Channel):
         #collision = pygame.sprite.spritecollide(self.vaisseau, chicken_group, False, pygame.sprite.collide_circle_ratio(0.5))
 
         self.send_chickens(chicken_group)
+        self.send_score()
 
 
     def send_chickens(self, chicken_group):
@@ -151,6 +156,8 @@ class ClientChannel(Channel):
 
         self.Send({"action":'chickens', 'chickens': chickens})
 
+    def send_score(self):
+        self.Send({"action":'score', 'score':ClientChannel.score})
 
 
 # SERVER

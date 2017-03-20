@@ -29,6 +29,7 @@ def load_png(name):
 
 # PODSIXNET
 class GameClient(ConnectionListener):
+    score = 0
 
     def __init__(self, host, port):
         self.Connect((host, port))
@@ -49,6 +50,10 @@ class GameClient(ConnectionListener):
     def Network_disconnected(self, data):
         print('Server disconnected')
         sys.exit()
+
+    def Network_score(self, data):
+        GameClient.score = data['score']
+
 
 
 # CLASSES
@@ -95,6 +100,7 @@ class Chicken(pygame.sprite.Sprite):
 
     def update(self, position):
         self.rect.center = position[0:2]
+
 
 class Shot(pygame.sprite.Sprite):
     '''
@@ -170,7 +176,7 @@ if __name__ == '__main__':
     vaisseau_sprite.add(Vaisseau(2))
     shot_group = SpriteGroup('shots')
     chicken_group = SpriteGroup('chickens')
-
+    font = pygame.font.Font("police/Verdana.ttf", 30)
     while True:
         clock.tick(60)
         connection.Pump()
@@ -198,6 +204,11 @@ if __name__ == '__main__':
             shot_group.draw(screen)
             chicken_group.clear(screen, background_image)
             chicken_group.draw(screen)
+
+            variable = "Score : " + str(GameClient.score)
+            print(variable)
+            afficher = font.render(str(variable), 1, (0, 0, 0))
+            screen.blit(afficher, (5,5))
 
         else: # game is not running
             screen.blit(wait_image, wait_rect)
