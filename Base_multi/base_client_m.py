@@ -236,19 +236,19 @@ if __name__ == '__main__':
             chicken_group.draw(screen)
 
             affScore = "Score : " + str(GameClient.score)
-            score = font.render(str(affScore), 1, (0, 0, 0))
+            score = font.render(str(affScore), 1, (255, 255, 255))
             screen.blit(score, (5,5))
 
             affVie1 = "Vie J1: " + str(GameClient.vie1)
-            vie1 = font.render(str(affVie1), 1, (0, 0, 0))
+            vie1 = font.render(str(affVie1), 1, (255, 255, 255))
             screen.blit(vie1, (5,SCREEN_HEIGHT - 55))
 
             affVie2 = "Vie J2: " + str(GameClient.vie2)
-            vie2 = font.render(str(affVie2), 1, (0, 0, 0))
+            vie2 = font.render(str(affVie2), 1, (255, 255, 255))
             screen.blit(vie2, (SCREEN_WIDTH - 155,SCREEN_HEIGHT - 55))
 
             affNumVague = "Vague : " + str(GameClient.numVague)
-            numVague = font.render(str(affNumVague), 1, (0, 0, 0))
+            numVague = font.render(str(affNumVague), 1, (255, 255, 255))
             screen.blit(numVague, (SCREEN_WIDTH - 175, 5))
 
         else: # game is not running
