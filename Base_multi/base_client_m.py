@@ -177,8 +177,8 @@ class SpriteGroup(pygame.sprite.RenderClear, ConnectionListener):
 
 # MAIN
 if __name__ == '__main__':
-    SCREEN_WIDTH = 800
-    SCREEN_HEIGHT = 600
+    SCREEN_WIDTH = 1024
+    SCREEN_HEIGHT = 768
 
     # PodSixNet init
     game_client = GameClient(sys.argv[1],int(sys.argv[2]))
@@ -249,7 +249,7 @@ if __name__ == '__main__':
 
             affNumVague = "Vague : " + str(GameClient.numVague)
             numVague = font.render(str(affNumVague), 1, (0, 0, 0))
-            screen.blit(numVague, (SCREEN_WIDTH - 155, 5))
+            screen.blit(numVague, (SCREEN_WIDTH - 175, 5))
 
         else: # game is not running
             screen.blit(wait_image, wait_rect)

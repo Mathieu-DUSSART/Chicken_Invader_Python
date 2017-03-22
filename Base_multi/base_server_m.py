@@ -119,7 +119,7 @@ class Vague(pygame.sprite.Sprite):
     def __init__(self, numero, chicken_group):
         pygame.sprite.Sprite.__init__(self)
         '''On définit la difficulté'''
-        self.difficulte = (numero * 1.4) / 2
+        self.difficulte = numero * 0.7
         '''Booléen qui définit si la vague est finie ou non'''
         self.enCours = True
 
@@ -285,6 +285,17 @@ class MyServer(Server):
         if len(message2) == 0:
             message2 = [ vaisseau2.rect.centerx, vaisseau2.rect.centery ]
 
+        collisionCadeau1 = pygame.sprite.spritecollide(vaisseau1, self.cadeau_group, True, pygame.sprite.collide_circle_ratio(0.5))
+        collisionCadeau2 = pygame.sprite.spritecollide(vaisseau2, self.cadeau_group, True, pygame.sprite.collide_circle_ratio(0.5))
+
+        if len(collisionCadeau1) != 0:
+            self.clients[0].force += 10
+            print("Force 1 = " + str(self.clients[0].force))
+
+
+        if len(collisionCadeau2) != 0:
+            self.clients[1].force += 10
+            print("Force 2 = " + str(self.clients[1].force))
 
 
         for client in self.clients:
@@ -311,6 +322,13 @@ class MyServer(Server):
     def send_numVague(self):
         for client in self.clients:
             client.Send({"action":'numVague', 'numVague': self.numVague})
+
+    def send_cadeaux(self):
+        cadeaux = []
+        for cadeau in self.cadeau_group:
+            cadeaux.append(cadeau.rect.center)
+        for client in self.clients:
+            client.Send({"action":'cadeau', 'cadeau': cadeaux})
 
     def update_channels(self, chicken_group):
         self.send_vie()
@@ -362,9 +380,10 @@ class MyServer(Server):
 
                 for chicken in self.chicken_group:
                     egg = random.randint(1, 4000)
+                    cadeau = random.randint(1, 20000)
                     if egg == 42:
                         self.shot_group.add(Shot(chicken.rect.center, 's', 1))
-                    if egg < 11:
+                    if cadeau == 42:
                         self.cadeau_group.add(Cadeau(chicken.rect.center))
                 self.send_shots()
                 self.shot_group.update()
@@ -378,7 +397,7 @@ class MyServer(Server):
 
 # PROGRAMME INIT
 if __name__ == '__main__':
-    SCREEN_WIDTH = 800
-    SCREEN_HEIGHT = 600
+    SCREEN_WIDTH = 1024
+    SCREEN_HEIGHT = 768
     my_server = MyServer(localaddr = (sys.argv[1],int(sys.argv[2])))
     my_server.launch_game()
