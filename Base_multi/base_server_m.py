@@ -50,7 +50,19 @@ class Vaisseau(pygame.sprite.Sprite):
 
     def update(self, keys):
         if self.dead == False:
-            if keys[K_UP]:
+            if keys[K_UP] and keys[K_LEFT]:
+                if self.rect.center[1] >= 0 and self.rect.center[0] >= 0:
+                    self.rect = self.rect.move([-7,-7])
+            elif keys[K_UP] and keys[K_RIGHT]:
+                if self.rect.center[1] >= 0 and self.rect.center[0] <= SCREEN_WIDTH:
+                    self.rect = self.rect.move([7,-7])
+            elif keys[K_DOWN] and keys[K_RIGHT]:
+                if self.rect.center[1] <= SCREEN_HEIGHT and self.rect.center[0] <= SCREEN_WIDTH:
+                    self.rect = self.rect.move([7,7])
+            elif keys[K_DOWN] and keys[K_LEFT]:
+                if self.rect.center[1] <= SCREEN_HEIGHT and self.rect.center[0] >= 0:
+                    self.rect = self.rect.move([-7,7])
+            elif keys[K_UP]:
                 if self.rect.center[1] >= 0:
                     self.rect = self.rect.move([0,-10])
             elif keys[K_DOWN]:
@@ -77,6 +89,7 @@ class Chicken(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         #self.shot_group = pygame.sprite.RenderClear()
         self.vie = 10 * difficulte
+        self.difficulte = difficulte
         self.image,self.rect=load_png("Pics/chicken.png")
         #coord_x = random.randrange(100, SCREEN_WIDTH, 100)
         #coord_y = random.randrange(100, 250, 72)
@@ -92,7 +105,7 @@ class Chicken(pygame.sprite.Sprite):
         ''' '''
 
     def __del__(self):
-        ClientChannel.score += 10
+        ClientChannel.score += int(100 * (self.difficulte / 2))
 
 class Shot(pygame.sprite.Sprite):
     '''
@@ -102,7 +115,7 @@ class Shot(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image,self.rect=load_png("Pics/shot.png")
         self.rect.center = center
-        speeds = {'nw':[-1,-1], 'ne':[1,-1], 'n':[0,-1], 'sw':[-1,1], 'se':[1,1], 's':[0,1], 'w':[-1,0], 'e':[1,0]}
+        speeds = {'nw':[-0.1,-1], 'ne':[0.1,-1], 'n':[0,-1], 'sw':[-1,1], 'se':[1,1], 's':[0,1], 'w':[-1,0], 'e':[1,0]}
         self.vector = [speed * x for x in speeds[orientation]]
 
     def update(self):
@@ -127,11 +140,9 @@ class Vague(pygame.sprite.Sprite):
         Chicken.coord_x = 50
         Chicken.coord_y = 50
 
-        '''On fait apparaitre 25 poulets par vague '''
-        nbPoulet = 0
-        while nbPoulet < 25:
+        '''On fait apparaitre 30 poulets par vague '''
+        for nbPoulet in range(0, 30):
             chicken_group.add(Chicken(self.difficulte))
-            nbPoulet += 1
 
     def update(self):
         ''''''
@@ -168,6 +179,7 @@ class ClientChannel(Channel):
         self.shooting = 0
         self.vie = 3
         self.force = 10
+        self.nbTir = 1
 
     def create_vaisseau(self, number):
         self.vaisseau = Vaisseau(number)
@@ -185,7 +197,33 @@ class ClientChannel(Channel):
             self.shooting -= 1
         if keys[K_SPACE]:
             if self.shooting == 0 and self.vaisseau.alive():
-                self.shot_group.add(Shot(self.vaisseau.rect.center, 'n', 15))
+                if self.nbTir == 1:
+                    self.shot_group.add(Shot(self.vaisseau.rect.center, 'n', 15))
+                elif self.nbTir == 2:
+                    '''1er tir'''
+                    centerTir = self.vaisseau.rect
+                    centerTir[0] = centerTir[0] - 16
+                    self.shot_group.add(Shot(centerTir.center, 'n', 15))
+                    '''2eme tir'''
+                    centerTir = self.vaisseau.rect
+                    centerTir[0] = centerTir[0] + 16
+                    self.shot_group.add(Shot(centerTir.center, 'n', 15))
+                elif self.nbTir == 3:
+                    '''1er tir'''
+                    self.shot_group.add(Shot([self.vaisseau.rect.center[0] - 16, self.vaisseau.rect.center[1]], 'nw', 15))
+                    '''2eme tir'''
+                    self.shot_group.add(Shot(self.vaisseau.rect.center, 'n', 15))
+                    '''3eme tir'''
+                    self.shot_group.add(Shot([self.vaisseau.rect.center[0] + 16, self.vaisseau.rect.center[1]], 'ne', 15))
+                elif self.nbTir >= 4:
+                    '''1er tir'''
+                    self.shot_group.add(Shot([self.vaisseau.rect.center[0] - 16, self.vaisseau.rect.center[1]], 'nw', 15))
+                    '''2eme tir'''
+                    self.shot_group.add(Shot([self.vaisseau.rect.center[0] - 8, self.vaisseau.rect.center[1]], 'n', 15))
+                    '''3eme tir'''
+                    self.shot_group.add(Shot([self.vaisseau.rect.center[0] + 8, self.vaisseau.rect.center[1]], 'n', 15))
+                    '''4eme tir'''
+                    self.shot_group.add(Shot([self.vaisseau.rect.center[0] + 16, self.vaisseau.rect.center[1]], 'ne', 15))
                 self.shooting = 12
         self.vaisseau.update(keys)
 
@@ -288,14 +326,21 @@ class MyServer(Server):
         collisionCadeau1 = pygame.sprite.spritecollide(vaisseau1, self.cadeau_group, True, pygame.sprite.collide_circle_ratio(0.5))
         collisionCadeau2 = pygame.sprite.spritecollide(vaisseau2, self.cadeau_group, True, pygame.sprite.collide_circle_ratio(0.5))
 
+
         if len(collisionCadeau1) != 0:
             self.clients[0].force += 10
-            print("Force 1 = " + str(self.clients[0].force))
+            if self.clients[0].force == 40 and self.clients[0].nbTir <= 4:
+                self.clients[0].nbTir += 1
+                self.clients[0].force = 10
 
 
         if len(collisionCadeau2) != 0:
             self.clients[1].force += 10
-            print("Force 2 = " + str(self.clients[1].force))
+            if self.clients[1].force == 40 and self.clients[1].nbTir <= 4:
+                self.clients[1].nbTir += 1
+                self.clients[1].force = 10
+
+
 
 
         for client in self.clients:
@@ -380,7 +425,7 @@ class MyServer(Server):
 
                 for chicken in self.chicken_group:
                     egg = random.randint(1, 4000)
-                    cadeau = random.randint(1, 20000)
+                    cadeau = random.randint(1, 2000)
                     if egg == 42:
                         self.shot_group.add(Shot(chicken.rect.center, 's', 1))
                     if cadeau == 42:
