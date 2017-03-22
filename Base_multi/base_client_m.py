@@ -32,6 +32,7 @@ class GameClient(ConnectionListener):
     score = 0
     vie1 = 3
     vie2 = 3
+    numVague = 1
 
     def __init__(self, host, port):
         self.Connect((host, port))
@@ -57,10 +58,11 @@ class GameClient(ConnectionListener):
         GameClient.score = data['score']
 
     def Network_vie(self, data):
-
         GameClient.vie1 = data['vie1']
         GameClient.vie2 = data['vie2']
 
+    def Network_numVague(self, data):
+        GameClient.numVague = data['numVague']
 
 
 # CLASSES
@@ -224,6 +226,10 @@ if __name__ == '__main__':
             affVie2 = "Vie J2: " + str(GameClient.vie2)
             vie2 = font.render(str(affVie2), 1, (0, 0, 0))
             screen.blit(vie2, (SCREEN_WIDTH - 155,SCREEN_HEIGHT - 55))
+
+            affNumVague = "Vague : " + str(GameClient.numVague)
+            numVague = font.render(str(affNumVague), 1, (0, 0, 0))
+            screen.blit(numVague, (SCREEN_WIDTH - 155, 5))
 
         else: # game is not running
             screen.blit(wait_image, wait_rect)

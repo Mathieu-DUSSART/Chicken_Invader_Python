@@ -13,6 +13,7 @@ import random
 from PodSixNet.Channel import Channel
 from PodSixNet.Server import Server
 import time,sys
+from math import sqrt
 
 
 
@@ -72,10 +73,10 @@ class Chicken(pygame.sprite.Sprite):
     coord_x = 50
     coord_y = 50
 
-    def __init__(self):
+    def __init__(self, difficulte):
         pygame.sprite.Sprite.__init__(self)
         #self.shot_group = pygame.sprite.RenderClear()
-
+        self.vie = 10 * difficulte
         self.image,self.rect=load_png("Pics/chicken.png")
         #coord_x = random.randrange(100, SCREEN_WIDTH, 100)
         #coord_y = random.randrange(100, 250, 72)
@@ -111,6 +112,32 @@ class Shot(pygame.sprite.Sprite):
         if((self.rect.left>SCREEN_WIDTH) or (self.rect.right<0)):
             self.kill()
 
+class Vague(pygame.sprite.Sprite):
+    '''
+    The player's shots
+    '''
+    def __init__(self, numero, chicken_group):
+        pygame.sprite.Sprite.__init__(self)
+        '''On définit la difficulté'''
+        self.difficulte = (numero * 1.4) / 2
+        '''Booléen qui définit si la vague est finie ou non'''
+        self.enCours = True
+
+        '''On reset les coordonnées de de début de la vague'''
+        Chicken.coord_x = 50
+        Chicken.coord_y = 50
+
+        '''On fait apparaitre 25 poulets par vague '''
+        nbPoulet = 0
+        while nbPoulet < 25:
+            chicken_group.add(Chicken(self.difficulte))
+            nbPoulet += 1
+
+    def update(self):
+        ''''''
+
+    def terminerVague(self):
+        self.enCours = False
 
 # PODSIXNET *********************
 class ClientChannel(Channel):
@@ -122,13 +149,14 @@ class ClientChannel(Channel):
         self.shot_group = pygame.sprite.RenderClear()
         self.shooting = 0
         self.vie = 3
+        self.force = 10
 
     def create_vaisseau(self, number):
         self.vaisseau = Vaisseau(number)
         MyServer.vaisseau_group.add(self.vaisseau)
 
-    def create_chicken(self):
-        self.chicken = Chicken()
+    def create_chicken(self, diff):
+        self.chicken = Chicken(diff)
 
     def Close(self):
         self._server.del_client(self)
@@ -146,7 +174,14 @@ class ClientChannel(Channel):
     def update(self, chicken_group):
         self.shot_group.update()
 
-        pygame.sprite.groupcollide(chicken_group, self.shot_group, True, True, pygame.sprite.collide_circle_ratio(0.85))
+        """ Collision entre tir du joueur et poulets"""
+        chickenHit = pygame.sprite.groupcollide(chicken_group, self.shot_group, False, True, pygame.sprite.collide_circle_ratio(0.85))
+        for chicken in chickenHit.keys():
+            '''Quand un poulet est touché, on diminue sa vie en fonction de la puissance du joueur'''
+            if len(chickenHit) != 0:
+                chicken.vie -= self.force
+                if chicken.vie <= 0:
+                    chicken.kill()
 
         self.send_chickens(chicken_group)
         self.send_score()
@@ -185,7 +220,7 @@ class MyServer(Server):
     def Connected(self, channel, addr):
         self.clients.append(channel)
         channel.create_vaisseau(len(self.clients))
-        channel.create_chicken()
+        channel.create_chicken(3)
         print('New connection: %d client(s) connected' % len(self.clients))
 
         if len(self.clients) == 2:
@@ -255,6 +290,10 @@ class MyServer(Server):
         for client in self.clients:
             client.Send({"action":'shots', 'shots': shots})
 
+    def send_numVague(self):
+        for client in self.clients:
+            client.Send({"action":'numVague', 'numVague': self.numVague})
+
     def update_channels(self, chicken_group):
         self.send_vie()
         for client in self.clients:
@@ -275,8 +314,8 @@ class MyServer(Server):
         self.screen.blit(wait_image, wait_rect)
         self.chicken_group = pygame.sprite.RenderClear()
 
-        """self.vaisseau_group.add(self.vaisseau1)
-        self.vaisseau_group.add(self.vaisseau2)"""
+        self.numVague = 1
+        vague = Vague(1, self.chicken_group)
 
         while True:
             clock.tick(60)
@@ -290,14 +329,22 @@ class MyServer(Server):
                 # updates
                 self.send_vaisseaux()
                 self.update_channels(self.chicken_group)
-                if test < 25:
-                    self.chicken_group.add(Chicken())
-                    test = test + 1
 
+                '''Si la vague actuelle est terminée, on relance une nouvelle vague '''
+                if vague.enCours == False:
+                    print(str(self.numVague) + " " + str(vague.enCours))
+                    vague = Vague(self.numVague, self.chicken_group)
+
+
+                '''Si tous les poulets de la vague sont mort, on termine la vague '''
+                if len(self.chicken_group) == 0:
+                    vague.terminerVague()
+                    self.numVague += 1
+                    self.send_numVague()
 
                 for chicken in self.chicken_group:
                     egg = random.randint(1, 4000)
-                    if egg < 11:
+                    if egg == 42:
                         self.shot_group.add(Shot(chicken.rect.center, 's', 1))
                 self.send_shots()
                 self.shot_group.update()
