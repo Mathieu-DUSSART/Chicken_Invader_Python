@@ -43,9 +43,9 @@ class Vaisseau(pygame.sprite.Sprite):
         self.dead = False
 
         if number == 1:
-            self.rect.center = [SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT/2]
+            self.rect.center = [SCREEN_WIDTH/2 - 100, SCREEN_HEIGHT - 100]
         elif number == 2:
-            self.rect.center = [SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT/2]
+            self.rect.center = [SCREEN_WIDTH/2 + 100, SCREEN_HEIGHT - 100]
 
     def update(self, keys):
         if self.dead == False:
@@ -65,6 +65,7 @@ class Vaisseau(pygame.sprite.Sprite):
     def killVaisseau(self):
         self.dead = True
         self.kill()
+        self.rect.center = [-200, -200]
 
 class Chicken(pygame.sprite.Sprite):
     """Class for the player"""
@@ -115,13 +116,16 @@ class Shot(pygame.sprite.Sprite):
 class ClientChannel(Channel):
     score = 0
 
+
     def __init__(self, *args, **kwargs):
         Channel.__init__(self, *args, **kwargs)
         self.shot_group = pygame.sprite.RenderClear()
         self.shooting = 0
+        self.vie = 3
 
     def create_vaisseau(self, number):
         self.vaisseau = Vaisseau(number)
+        MyServer.vaisseau_group.add(self.vaisseau)
 
     def create_chicken(self):
         self.chicken = Chicken()
@@ -134,7 +138,7 @@ class ClientChannel(Channel):
         if self.shooting != 0:
             self.shooting -= 1
         if keys[K_SPACE]:
-            if self.shooting == 0:
+            if self.shooting == 0 and self.vaisseau.alive():
                 self.shot_group.add(Shot(self.vaisseau.rect.center, 'n', 15))
                 self.shooting = 12
         self.vaisseau.update(keys)
@@ -143,10 +147,11 @@ class ClientChannel(Channel):
         self.shot_group.update()
 
         pygame.sprite.groupcollide(chicken_group, self.shot_group, True, True, pygame.sprite.collide_circle_ratio(0.85))
-        #collision = pygame.sprite.spritecollide(self.vaisseau, chicken_group, False, pygame.sprite.collide_circle_ratio(0.5))
 
         self.send_chickens(chicken_group)
         self.send_score()
+        self.vie = self.vaisseau.life
+
 
 
     def send_chickens(self, chicken_group):
@@ -160,9 +165,11 @@ class ClientChannel(Channel):
         self.Send({"action":'score', 'score':ClientChannel.score})
 
 
+
+
 # SERVER
 class MyServer(Server):
-
+    vaisseau_group = pygame.sprite.RenderClear()
     channelClass = ClientChannel
 
     def __init__(self, *args, **kwargs):
@@ -199,11 +206,12 @@ class MyServer(Server):
         vaisseau1 = self.clients[0].vaisseau
         vaisseau2 = self.clients[1].vaisseau
 
+
         self.shot1 = self.clients[0].shot_group
         self.shot2 = self.clients[1].shot_group
 
-        collision = pygame.sprite.spritecollide(vaisseau1, self.shot_group, True, pygame.sprite.collide_circle_ratio(0.8))
-        collision2 = pygame.sprite.spritecollide(vaisseau2, self.shot_group, True, pygame.sprite.collide_circle_ratio(0.8))
+        collision = pygame.sprite.spritecollide(vaisseau1, self.shot_group, True, pygame.sprite.collide_circle_ratio(0.5))
+        collision2 = pygame.sprite.spritecollide(vaisseau2, self.shot_group, True, pygame.sprite.collide_circle_ratio(0.5))
 
         if len(collision) != 0:
             vaisseau1.life -= 1
@@ -229,7 +237,12 @@ class MyServer(Server):
         for client in self.clients:
             client.Send({'action':'vaisseau', 'vaisseau1':message1, 'vaisseau2':message2})
 
+    def send_vie(self):
+        vie1 = self.clients[0].vie
+        vie2 = self.clients[1].vie
 
+        for client in self.clients:
+            client.Send({"action":'vie', 'vie1':vie1, 'vie2':vie2})
 
     def send_shots(self):
         shots = []
@@ -243,6 +256,7 @@ class MyServer(Server):
             client.Send({"action":'shots', 'shots': shots})
 
     def update_channels(self, chicken_group):
+        self.send_vie()
         for client in self.clients:
             client.update(chicken_group)
 
@@ -260,6 +274,9 @@ class MyServer(Server):
         wait_image, wait_rect = load_png('Pics/wait.png')
         self.screen.blit(wait_image, wait_rect)
         self.chicken_group = pygame.sprite.RenderClear()
+
+        """self.vaisseau_group.add(self.vaisseau1)
+        self.vaisseau_group.add(self.vaisseau2)"""
 
         while True:
             clock.tick(60)
@@ -280,7 +297,7 @@ class MyServer(Server):
 
                 for chicken in self.chicken_group:
                     egg = random.randint(1, 4000)
-                    if egg == 42:
+                    if egg < 11:
                         self.shot_group.add(Shot(chicken.rect.center, 's', 1))
                 self.send_shots()
                 self.shot_group.update()

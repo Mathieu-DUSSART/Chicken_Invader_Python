@@ -30,6 +30,8 @@ def load_png(name):
 # PODSIXNET
 class GameClient(ConnectionListener):
     score = 0
+    vie1 = 3
+    vie2 = 3
 
     def __init__(self, host, port):
         self.Connect((host, port))
@@ -53,6 +55,11 @@ class GameClient(ConnectionListener):
 
     def Network_score(self, data):
         GameClient.score = data['score']
+
+    def Network_vie(self, data):
+
+        GameClient.vie1 = data['vie1']
+        GameClient.vie2 = data['vie2']
 
 
 
@@ -199,16 +206,24 @@ if __name__ == '__main__':
 
             # drawings
             vaisseau_sprite.clear(screen, background_image)
+            screen.blit(background_image, background_rect)
             vaisseau_sprite.draw(screen)
             shot_group.clear(screen, background_image)
             shot_group.draw(screen)
             chicken_group.clear(screen, background_image)
             chicken_group.draw(screen)
 
-            variable = "Score : " + str(GameClient.score)
-            print(variable)
-            afficher = font.render(str(variable), 1, (0, 0, 0))
-            screen.blit(afficher, (5,5))
+            affScore = "Score : " + str(GameClient.score)
+            score = font.render(str(affScore), 1, (0, 0, 0))
+            screen.blit(score, (5,5))
+
+            affVie1 = "Vie J1: " + str(GameClient.vie1)
+            vie1 = font.render(str(affVie1), 1, (0, 0, 0))
+            screen.blit(vie1, (5,SCREEN_HEIGHT - 55))
+
+            affVie2 = "Vie J2: " + str(GameClient.vie2)
+            vie2 = font.render(str(affVie2), 1, (0, 0, 0))
+            screen.blit(vie2, (SCREEN_WIDTH - 155,SCREEN_HEIGHT - 55))
 
         else: # game is not running
             screen.blit(wait_image, wait_rect)
