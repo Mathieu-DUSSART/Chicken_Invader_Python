@@ -139,6 +139,24 @@ class Vague(pygame.sprite.Sprite):
     def terminerVague(self):
         self.enCours = False
 
+class Cadeau(pygame.sprite.Sprite):
+    '''
+    The player's shots
+    '''
+    def __init__(self,center):
+        pygame.sprite.Sprite.__init__(self)
+        self.image,self.rect=load_png("Pics/cadeau.png")
+        self.rect.center = center
+        speeds = {'nw':[-1,-1], 'ne':[1,-1], 'n':[0,-1], 'sw':[-1,1], 'se':[1,1], 's':[0,1], 'w':[-1,0], 'e':[1,0]}
+        self.vector = [1 * x for x in speeds['s']]
+
+    def update(self):
+        self.rect=self.rect.move(self.vector)
+        if((self.rect.top>SCREEN_WIDTH) or (self.rect.bottom<0)):
+            self.kill()
+        if((self.rect.left>SCREEN_WIDTH) or (self.rect.right<0)):
+            self.kill()
+
 # PODSIXNET *********************
 class ClientChannel(Channel):
     score = 0
@@ -313,7 +331,7 @@ class MyServer(Server):
         wait_image, wait_rect = load_png('Pics/wait.png')
         self.screen.blit(wait_image, wait_rect)
         self.chicken_group = pygame.sprite.RenderClear()
-
+        self.cadeau_group = pygame.sprite.RenderClear()
         self.numVague = 1
         vague = Vague(1, self.chicken_group)
 
@@ -346,8 +364,13 @@ class MyServer(Server):
                     egg = random.randint(1, 4000)
                     if egg == 42:
                         self.shot_group.add(Shot(chicken.rect.center, 's', 1))
+                    if egg < 11:
+                        self.cadeau_group.add(Cadeau(chicken.rect.center))
                 self.send_shots()
                 self.shot_group.update()
+
+                self.send_cadeaux()
+                self.cadeau_group.update()
 
 
             pygame.display.flip()

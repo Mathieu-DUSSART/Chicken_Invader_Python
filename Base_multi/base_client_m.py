@@ -123,6 +123,18 @@ class Shot(pygame.sprite.Sprite):
         self.rect.center = position
 
 
+class Cadeau(pygame.sprite.Sprite):
+    '''
+    The player's shots
+    '''
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = load_png('Pics/cadeau.png')
+
+    def update(self, position):
+        self.rect.center = position
+
+
 class SpriteGroup(pygame.sprite.RenderClear, ConnectionListener):
     '''
     Sprite groups (shots, mechs)
@@ -156,6 +168,8 @@ class SpriteGroup(pygame.sprite.RenderClear, ConnectionListener):
             self.add(Shot())
         elif self.action == 'chickens':
             self.add(Chicken())
+        elif self.action == 'cadeau':
+            self.add(Cadeau())
 
     def update(self):
         self.Pump()
@@ -183,8 +197,11 @@ if __name__ == '__main__':
     vaisseau_sprite = pygame.sprite.RenderClear()
     vaisseau_sprite.add(Vaisseau(1))
     vaisseau_sprite.add(Vaisseau(2))
+
     shot_group = SpriteGroup('shots')
     chicken_group = SpriteGroup('chickens')
+    cadeau_group = SpriteGroup('cadeau')
+
     font = pygame.font.Font("police/Verdana.ttf", 30)
     while True:
         clock.tick(60)
@@ -205,6 +222,7 @@ if __name__ == '__main__':
             vaisseau_sprite.update()
             shot_group.update()
             chicken_group.update()
+            cadeau_group.update()
 
             # drawings
             vaisseau_sprite.clear(screen, background_image)
@@ -212,6 +230,8 @@ if __name__ == '__main__':
             vaisseau_sprite.draw(screen)
             shot_group.clear(screen, background_image)
             shot_group.draw(screen)
+            cadeau_group.clear(screen, background_image)
+            cadeau_group.draw(screen)
             chicken_group.clear(screen, background_image)
             chicken_group.draw(screen)
 
