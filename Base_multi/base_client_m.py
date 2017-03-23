@@ -250,26 +250,32 @@ if __name__ == '__main__':
             chicken_group.clear(screen, background_image)
             chicken_group.draw(screen)
 
+            '''Affiche le score'''
             affScore = "Score : " + str(GameClient.score)
             score = font.render(str(affScore), 1, (255, 255, 255))
             screen.blit(score, (5,5))
 
+            '''Affiche la vie du joueur 1'''
             affVie1 = "Vie J1: " + str(GameClient.vie1)
             vie1 = font.render(str(affVie1), 1, (255, 255, 255))
             screen.blit(vie1, (5,SCREEN_HEIGHT - 100))
 
+            '''Affiche la vie du joueur 2'''
             affVie2 = "Vie J2: " + str(GameClient.vie2)
             vie2 = font.render(str(affVie2), 1, (255, 255, 255))
             screen.blit(vie2, (SCREEN_WIDTH - 155,SCREEN_HEIGHT - 100))
 
+            '''Affiche la puissance de tir du joueur 1'''
             affPuiss1 = "Puissance J1: " + str(GameClient.puissanceTir1)
             puiss1 = font.render(str(affPuiss1), 1, (255, 255, 255))
             screen.blit(puiss1, (5, SCREEN_HEIGHT - 55))
 
+            '''Affiche la puissance de tir du joueur 2'''
             affPuiss2 = "Puissance J2: " + str(GameClient.puissanceTir2)
             puiss2 = font.render(str(affPuiss2), 1, (255, 255, 255))
-            screen.blit(puiss2, (SCREEN_WIDTH - 255,SCREEN_HEIGHT - 55))
+            screen.blit(puiss2, (SCREEN_WIDTH - 315,SCREEN_HEIGHT - 55))
 
+            '''Affiche le numéro de la vague actuelle'''
             affNumVague = "Vague : " + str(GameClient.numVague)
             numVague = font.render(str(affNumVague), 1, (255, 255, 255))
             screen.blit(numVague, (SCREEN_WIDTH - 175, 5))

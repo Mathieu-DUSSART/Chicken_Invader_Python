@@ -332,14 +332,14 @@ class MyServer(Server):
 
         if len(collisionCadeau1) != 0:
             self.clients[0].force += 10
-            if self.clients[0].force == 40 and self.clients[0].nbTir <= 4:
+            if self.clients[0].force == 40 and self.clients[0].nbTir < 4:
                 self.clients[0].nbTir += 1
                 self.clients[0].force = 10
 
 
         if len(collisionCadeau2) != 0:
             self.clients[1].force += 10
-            if self.clients[1].force == 40 and self.clients[1].nbTir <= 4:
+            if self.clients[1].force == 40 and self.clients[1].nbTir < 4:
                 self.clients[1].nbTir += 1
                 self.clients[1].force = 10
 
