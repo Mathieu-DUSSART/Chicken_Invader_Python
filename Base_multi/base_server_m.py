@@ -382,6 +382,13 @@ class MyServer(Server):
         for client in self.clients:
             client.Send({"action":'cadeau', 'cadeau': cadeaux})
 
+    def send_puissaceTir(self):
+        puiss1 = str(self.clients[0].nbTir) + "x" + str(self.clients[0].force)
+        puiss2 = str(self.clients[1].nbTir) + "x" + str(self.clients[1].force)
+
+        for client in self.clients:
+            client.Send({"action":'puissanceTir', 'puissanceTir1':puiss1, 'puissanceTir2':puiss2})
+
     def update_channels(self, chicken_group):
         self.send_vie()
         for client in self.clients:

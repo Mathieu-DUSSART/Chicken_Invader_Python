@@ -33,6 +33,8 @@ class GameClient(ConnectionListener):
     vie1 = 3
     vie2 = 3
     numVague = 1
+    puissanceTir1 = ""
+    puissanceTir2 = ""
 
     def __init__(self, host, port):
         self.Connect((host, port))
@@ -63,6 +65,10 @@ class GameClient(ConnectionListener):
 
     def Network_numVague(self, data):
         GameClient.numVague = data['numVague']
+
+    def Network_puissanceTir(self, data):
+        GameClient.puissanceTir1 = data["puissanceTir1"]
+        GameClient.puissanceTir2 = data["puissanceTir2"]
 
 
 # CLASSES
@@ -117,7 +123,6 @@ class Shot(pygame.sprite.Sprite):
     '''
     def __init__(self, typeShot):
         pygame.sprite.Sprite.__init__(self)
-        print("coucou " + str(typeShot))
         if typeShot == 0:
             self.image, self.rect = load_png('Pics/shot.png')
         elif typeShot == 1:
@@ -256,6 +261,14 @@ if __name__ == '__main__':
             affVie2 = "Vie J2: " + str(GameClient.vie2)
             vie2 = font.render(str(affVie2), 1, (255, 255, 255))
             screen.blit(vie2, (SCREEN_WIDTH - 155,SCREEN_HEIGHT - 55))
+
+            affPuiss1 = "Puissance J1: " + str(GameClient.puissanceTir1)
+            puiss1 = font.render(str(affPuiss1), 1, (255, 255, 255))
+            screen.blit(puiss1, (5, SCREEN_HEIGHT - 100))
+
+            affPuiss2 = "Puissance J2: " + str(GameClient.puissanceTir2)
+            puiss2 = font.render(str(affPuiss2), 1, (255, 255, 255))
+            screen.blit(puiss2, (SCREEN_WIDTH - 155,SCREEN_HEIGHT - 100))
 
             affNumVague = "Vague : " + str(GameClient.numVague)
             numVague = font.render(str(affNumVague), 1, (255, 255, 255))
