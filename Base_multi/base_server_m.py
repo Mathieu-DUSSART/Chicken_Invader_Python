@@ -449,6 +449,7 @@ class MyServer(Server):
 
                 self.send_cadeaux()
                 self.cadeau_group.update()
+                self.send_puissaceTir()
 
 
             pygame.display.flip()

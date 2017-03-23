@@ -256,19 +256,19 @@ if __name__ == '__main__':
 
             affVie1 = "Vie J1: " + str(GameClient.vie1)
             vie1 = font.render(str(affVie1), 1, (255, 255, 255))
-            screen.blit(vie1, (5,SCREEN_HEIGHT - 55))
+            screen.blit(vie1, (5,SCREEN_HEIGHT - 100))
 
             affVie2 = "Vie J2: " + str(GameClient.vie2)
             vie2 = font.render(str(affVie2), 1, (255, 255, 255))
-            screen.blit(vie2, (SCREEN_WIDTH - 155,SCREEN_HEIGHT - 55))
+            screen.blit(vie2, (SCREEN_WIDTH - 155,SCREEN_HEIGHT - 100))
 
             affPuiss1 = "Puissance J1: " + str(GameClient.puissanceTir1)
             puiss1 = font.render(str(affPuiss1), 1, (255, 255, 255))
-            screen.blit(puiss1, (5, SCREEN_HEIGHT - 100))
+            screen.blit(puiss1, (5, SCREEN_HEIGHT - 55))
 
             affPuiss2 = "Puissance J2: " + str(GameClient.puissanceTir2)
             puiss2 = font.render(str(affPuiss2), 1, (255, 255, 255))
-            screen.blit(puiss2, (SCREEN_WIDTH - 155,SCREEN_HEIGHT - 100))
+            screen.blit(puiss2, (SCREEN_WIDTH - 255,SCREEN_HEIGHT - 55))
 
             affNumVague = "Vague : " + str(GameClient.numVague)
             numVague = font.render(str(affNumVague), 1, (255, 255, 255))
