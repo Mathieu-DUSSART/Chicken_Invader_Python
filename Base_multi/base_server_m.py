@@ -83,7 +83,7 @@ class Vaisseau(pygame.sprite.Sprite):
 class Chicken(pygame.sprite.Sprite):
     """Class for the player"""
     coord_x = 50
-    coord_y = 50
+    coord_y = 150
 
     def __init__(self, difficulte):
         pygame.sprite.Sprite.__init__(self)
@@ -138,7 +138,7 @@ class Vague(pygame.sprite.Sprite):
 
         '''On reset les coordonnées de de début de la vague'''
         Chicken.coord_x = 50
-        Chicken.coord_y = 50
+        Chicken.coord_y = 100
 
         '''On fait apparaitre 30 poulets par vague '''
         for nbPoulet in range(0, 30):
@@ -354,15 +354,19 @@ class MyServer(Server):
             client.Send({"action":'vie', 'vie1':vie1, 'vie2':vie2})
 
     def send_shots(self):
-        shots = []
+        shotsJoueur = []
         for shot in self.shot1:
-            shots.append(shot.rect.center)
+            shotsJoueur.append(shot.rect.center)
         for shot in self.shot2:
-            shots.append(shot.rect.center)
+            shotsJoeur.append(shot.rect.center)
+
+        shotsChicken = []
         for shot in self.shot_group:
-            shots.append(shot.rect.center)
+            shotsChicken.append(shot.rect.center)
+
         for client in self.clients:
-            client.Send({"action":'shots', 'shots': shots})
+            client.Send({"action":'shotsJoueur', 'shotsJoueur': shotsJoueur})
+            client.Send({"action":'shotsChicken', 'shotsChicken': shotsChicken})
 
     def send_numVague(self):
         for client in self.clients:

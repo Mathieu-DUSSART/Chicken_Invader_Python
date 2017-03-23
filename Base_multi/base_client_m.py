@@ -115,9 +115,12 @@ class Shot(pygame.sprite.Sprite):
     '''
     The player's shots
     '''
-    def __init__(self):
+    def __init__(self, typeShot):
         pygame.sprite.Sprite.__init__(self)
-        self.image, self.rect = load_png('Pics/shot.png')
+        if typeShot == 0:
+            self.image, self.rect = load_png('Pics/shot.png')
+        elif typeShot == 1:
+            self.image, self.rect = load_png('Pics/egg.png')
 
     def update(self, position):
         self.rect.center = position
@@ -164,8 +167,10 @@ class SpriteGroup(pygame.sprite.RenderClear, ConnectionListener):
                 sprite.update(elems[indice])
 
     def add_elem(self):
-        if self.action == 'shots':
-            self.add(Shot())
+        if self.action == 'shotsJoueur':
+            self.add(Shot(0))
+        if self.action == 'shotsChicken':
+            self.add(Shot(1))
         elif self.action == 'chickens':
             self.add(Chicken())
         elif self.action == 'cadeau':
