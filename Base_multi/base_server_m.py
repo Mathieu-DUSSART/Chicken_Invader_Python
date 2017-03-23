@@ -111,9 +111,12 @@ class Shot(pygame.sprite.Sprite):
     '''
     The player's shots
     '''
-    def __init__(self,center,orientation,speed):
+    def __init__(self,typeShot,center,orientation,speed):
         pygame.sprite.Sprite.__init__(self)
-        self.image,self.rect=load_png("Pics/shot.png")
+        if typeShot == 0:
+            self.image, self.rect = load_png('Pics/shot.png')
+        elif typeShot == 1:
+            self.image, self.rect = load_png('Pics/egg.png')
         self.rect.center = center
         speeds = {'nw':[-0.1,-1], 'ne':[0.1,-1], 'n':[0,-1], 'sw':[-1,1], 'se':[1,1], 's':[0,1], 'w':[-1,0], 'e':[1,0]}
         self.vector = [speed * x for x in speeds[orientation]]
@@ -198,32 +201,32 @@ class ClientChannel(Channel):
         if keys[K_SPACE]:
             if self.shooting == 0 and self.vaisseau.alive():
                 if self.nbTir == 1:
-                    self.shot_group.add(Shot(self.vaisseau.rect.center, 'n', 15))
+                    self.shot_group.add(Shot(0, self.vaisseau.rect.center, 'n', 15))
                 elif self.nbTir == 2:
                     '''1er tir'''
                     centerTir = self.vaisseau.rect
                     centerTir[0] = centerTir[0] - 16
-                    self.shot_group.add(Shot(centerTir.center, 'n', 15))
+                    self.shot_group.add(Shot(0, centerTir.center, 'n', 15))
                     '''2eme tir'''
                     centerTir = self.vaisseau.rect
                     centerTir[0] = centerTir[0] + 16
-                    self.shot_group.add(Shot(centerTir.center, 'n', 15))
+                    self.shot_group.add(Shot(0, centerTir.center, 'n', 15))
                 elif self.nbTir == 3:
                     '''1er tir'''
-                    self.shot_group.add(Shot([self.vaisseau.rect.center[0] - 16, self.vaisseau.rect.center[1]], 'nw', 15))
+                    self.shot_group.add(Shot(0, [self.vaisseau.rect.center[0] - 16, self.vaisseau.rect.center[1]], 'nw', 15))
                     '''2eme tir'''
-                    self.shot_group.add(Shot(self.vaisseau.rect.center, 'n', 15))
+                    self.shot_group.add(Shot(0, self.vaisseau.rect.center, 'n', 15))
                     '''3eme tir'''
-                    self.shot_group.add(Shot([self.vaisseau.rect.center[0] + 16, self.vaisseau.rect.center[1]], 'ne', 15))
+                    self.shot_group.add(Shot(0, [self.vaisseau.rect.center[0] + 16, self.vaisseau.rect.center[1]], 'ne', 15))
                 elif self.nbTir >= 4:
                     '''1er tir'''
-                    self.shot_group.add(Shot([self.vaisseau.rect.center[0] - 16, self.vaisseau.rect.center[1]], 'nw', 15))
+                    self.shot_group.add(Shot(0, [self.vaisseau.rect.center[0] - 16, self.vaisseau.rect.center[1]], 'nw', 15))
                     '''2eme tir'''
-                    self.shot_group.add(Shot([self.vaisseau.rect.center[0] - 8, self.vaisseau.rect.center[1]], 'n', 15))
+                    self.shot_group.add(Shot(0, [self.vaisseau.rect.center[0] - 8, self.vaisseau.rect.center[1]], 'n', 15))
                     '''3eme tir'''
-                    self.shot_group.add(Shot([self.vaisseau.rect.center[0] + 8, self.vaisseau.rect.center[1]], 'n', 15))
+                    self.shot_group.add(Shot(0, [self.vaisseau.rect.center[0] + 8, self.vaisseau.rect.center[1]], 'n', 15))
                     '''4eme tir'''
-                    self.shot_group.add(Shot([self.vaisseau.rect.center[0] + 16, self.vaisseau.rect.center[1]], 'ne', 15))
+                    self.shot_group.add(Shot(0, [self.vaisseau.rect.center[0] + 16, self.vaisseau.rect.center[1]], 'ne', 15))
                 self.shooting = 12
         self.vaisseau.update(keys)
 
@@ -358,7 +361,7 @@ class MyServer(Server):
         for shot in self.shot1:
             shotsJoueur.append(shot.rect.center)
         for shot in self.shot2:
-            shotsJoeur.append(shot.rect.center)
+            shotsJoueur.append(shot.rect.center)
 
         shotsChicken = []
         for shot in self.shot_group:
@@ -431,7 +434,7 @@ class MyServer(Server):
                     egg = random.randint(1, 4000)
                     cadeau = random.randint(1, 2000)
                     if egg == 42:
-                        self.shot_group.add(Shot(chicken.rect.center, 's', 1))
+                        self.shot_group.add(Shot(1, chicken.rect.center, 's', 1))
                     if cadeau == 42:
                         self.cadeau_group.add(Cadeau(chicken.rect.center))
                 self.send_shots()
