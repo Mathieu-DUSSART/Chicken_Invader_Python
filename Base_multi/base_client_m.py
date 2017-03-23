@@ -117,6 +117,7 @@ class Shot(pygame.sprite.Sprite):
     '''
     def __init__(self, typeShot):
         pygame.sprite.Sprite.__init__(self)
+        print("coucou " + str(typeShot))
         if typeShot == 0:
             self.image, self.rect = load_png('Pics/shot.png')
         elif typeShot == 1:
@@ -203,7 +204,8 @@ if __name__ == '__main__':
     vaisseau_sprite.add(Vaisseau(1))
     vaisseau_sprite.add(Vaisseau(2))
 
-    shot_group = SpriteGroup('shots')
+    shot_group_joueur = SpriteGroup('shotsJoueur')
+    shot_group_chicken = SpriteGroup('shotsChicken')
     chicken_group = SpriteGroup('chickens')
     cadeau_group = SpriteGroup('cadeau')
 
@@ -225,7 +227,8 @@ if __name__ == '__main__':
 
             # updates
             vaisseau_sprite.update()
-            shot_group.update()
+            shot_group_joueur.update()
+            shot_group_chicken.update()
             chicken_group.update()
             cadeau_group.update()
 
@@ -233,8 +236,10 @@ if __name__ == '__main__':
             vaisseau_sprite.clear(screen, background_image)
             screen.blit(background_image, background_rect)
             vaisseau_sprite.draw(screen)
-            shot_group.clear(screen, background_image)
-            shot_group.draw(screen)
+            shot_group_joueur.clear(screen, background_image)
+            shot_group_joueur.draw(screen)
+            shot_group_chicken.clear(screen, background_image)
+            shot_group_chicken.draw(screen)
             cadeau_group.clear(screen, background_image)
             cadeau_group.draw(screen)
             chicken_group.clear(screen, background_image)
