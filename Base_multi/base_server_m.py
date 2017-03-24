@@ -39,7 +39,7 @@ class Vaisseau(pygame.sprite.Sprite):
     def __init__(self, number):
         pygame.sprite.Sprite.__init__(self)
         self.shot_group = pygame.sprite.RenderClear()
-        self.image, self.rect = load_png('Pics/soldier_n.png')
+        self.image, self.rect = load_png('Pics/vaisseau_r.png')
         self.life = 3
         self.dead = False
 
