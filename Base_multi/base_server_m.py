@@ -130,7 +130,7 @@ class Shot(pygame.sprite.Sprite):
 
 class Vague(pygame.sprite.Sprite):
     '''
-    The player's shots
+    Définit une vague de poulets
     '''
     def __init__(self, numero, chicken_group):
         pygame.sprite.Sprite.__init__(self)
@@ -155,7 +155,7 @@ class Vague(pygame.sprite.Sprite):
 
 class Cadeau(pygame.sprite.Sprite):
     '''
-    The player's shots
+    Définit les cadeaux (permettant d'augmenter la puissance des joueurs)
     '''
     def __init__(self,center):
         pygame.sprite.Sprite.__init__(self)
@@ -247,7 +247,7 @@ class ClientChannel(Channel):
         self.vie = self.vaisseau.life
 
 
-
+    '''Envoie les poulets aux clients'''
     def send_chickens(self, chicken_group):
         chickens = []
         for chicken in chicken_group.sprites():
@@ -255,9 +255,9 @@ class ClientChannel(Channel):
 
         self.Send({"action":'chickens', 'chickens': chickens})
 
+    '''Envoie la puissance de tir aux clients, pour qu'ils l'affiche'''
     def send_score(self):
         self.Send({"action":'score', 'score':ClientChannel.score})
-
 
 
 
@@ -282,6 +282,7 @@ class MyServer(Server):
         channel.create_chicken(3)
         print('New connection: %d client(s) connected' % len(self.clients))
 
+        '''Si les 2 clients sont connectés'''
         if len(self.clients) == 2:
             for client in self.clients:
                 client.Send({'action':'start'})
@@ -304,9 +305,11 @@ class MyServer(Server):
         self.shot1 = self.clients[0].shot_group
         self.shot2 = self.clients[1].shot_group
 
-        collision = pygame.sprite.spritecollide(vaisseau1, self.shot_group, True, pygame.sprite.collide_circle_ratio(0.5))
-        collision2 = pygame.sprite.spritecollide(vaisseau2, self.shot_group, True, pygame.sprite.collide_circle_ratio(0.5))
+        '''Collision entre les tirs des poulets et les joueurs'''
+        collision = pygame.sprite.spritecollide(vaisseau1, self.shot_group, True, pygame.sprite.collide_circle_ratio(0.7))
+        collision2 = pygame.sprite.spritecollide(vaisseau2, self.shot_group, True, pygame.sprite.collide_circle_ratio(0.7))
 
+        '''Si le joueur 1 se fait toucher par un oeuf, il perd une vie'''
         if len(collision) != 0:
             vaisseau1.life -= 1
             if vaisseau1.life == 0:
@@ -316,7 +319,7 @@ class MyServer(Server):
         if len(message1) == 0:
             message1 = [ vaisseau1.rect.centerx, vaisseau1.rect.centery ]
 
-
+        '''Si le joueur 2 se fait toucher par un oeuf, il perd une vie'''
         if len(collision2) != 0:
             vaisseau2.life -= 1
             if vaisseau2.life == 0:
@@ -326,29 +329,28 @@ class MyServer(Server):
         if len(message2) == 0:
             message2 = [ vaisseau2.rect.centerx, vaisseau2.rect.centery ]
 
-        collisionCadeau1 = pygame.sprite.spritecollide(vaisseau1, self.cadeau_group, True, pygame.sprite.collide_circle_ratio(0.5))
-        collisionCadeau2 = pygame.sprite.spritecollide(vaisseau2, self.cadeau_group, True, pygame.sprite.collide_circle_ratio(0.5))
+        '''Collision entre les cadeaux et les joueurs'''
+        collisionCadeau1 = pygame.sprite.spritecollide(vaisseau1, self.cadeau_group, True, pygame.sprite.collide_circle_ratio(0.7))
+        collisionCadeau2 = pygame.sprite.spritecollide(vaisseau2, self.cadeau_group, True, pygame.sprite.collide_circle_ratio(0.7))
 
-
+        '''Si le joueur 1 ramasse un cadeau, sa puissance augmente'''
         if len(collisionCadeau1) != 0:
             self.clients[0].force += 10
             if self.clients[0].force == 40 and self.clients[0].nbTir < 4:
                 self.clients[0].nbTir += 1
                 self.clients[0].force = 10
 
-
+        '''Si le joueur 2 ramasse un cadeau, sa puissance augmente'''
         if len(collisionCadeau2) != 0:
             self.clients[1].force += 10
             if self.clients[1].force == 40 and self.clients[1].nbTir < 4:
                 self.clients[1].nbTir += 1
                 self.clients[1].force = 10
 
-
-
-
         for client in self.clients:
             client.Send({'action':'vaisseau', 'vaisseau1':message1, 'vaisseau2':message2})
 
+    '''Envoie la vie des joueurs aux clients, pour qu'ils l'affiche'''
     def send_vie(self):
         vie1 = self.clients[0].vie
         vie2 = self.clients[1].vie
@@ -356,6 +358,7 @@ class MyServer(Server):
         for client in self.clients:
             client.Send({"action":'vie', 'vie1':vie1, 'vie2':vie2})
 
+    '''Envoie les tirs aux clients'''
     def send_shots(self):
         shotsJoueur = []
         for shot in self.shot1:
@@ -371,10 +374,12 @@ class MyServer(Server):
             client.Send({"action":'shotsJoueur', 'shotsJoueur': shotsJoueur})
             client.Send({"action":'shotsChicken', 'shotsChicken': shotsChicken})
 
+    '''Envoie le numéro de la vague actuelle aux clients, pour qu'ils l'affiche'''
     def send_numVague(self):
         for client in self.clients:
             client.Send({"action":'numVague', 'numVague': self.numVague})
 
+    '''Envoie les cadeaux'''
     def send_cadeaux(self):
         cadeaux = []
         for cadeau in self.cadeau_group:
@@ -382,7 +387,8 @@ class MyServer(Server):
         for client in self.clients:
             client.Send({"action":'cadeau', 'cadeau': cadeaux})
 
-    def send_puissaceTir(self):
+    '''Envoie la puissance de tir aux clients, pour qu'ils l'affiche'''
+    def send_puissanceTir(self):
         puiss1 = str(self.clients[0].nbTir) + "x" + str(self.clients[0].force)
         puiss2 = str(self.clients[1].nbTir) + "x" + str(self.clients[1].force)
 
@@ -393,6 +399,16 @@ class MyServer(Server):
         self.send_vie()
         for client in self.clients:
             client.update(chicken_group)
+
+        vie1 = self.clients[0].vie
+        vie2 = self.clients[1].vie
+        if(vie1 == 0 and vie2 == 0):
+            self.clients[0].Send({"action":"gameover"})
+            self.clients[0]._server.Pump()
+            self.clients[1].Send({"action":"gameover"})
+            self.clients[1]._server.Pump()
+            print('gameover')
+            sys.exit(0)
 
     # MAIN LOOP
     def launch_game(self):
@@ -427,7 +443,6 @@ class MyServer(Server):
 
                 '''Si la vague actuelle est terminée, on relance une nouvelle vague '''
                 if vague.enCours == False:
-                    print(str(self.numVague) + " " + str(vague.enCours))
                     vague = Vague(self.numVague, self.chicken_group)
 
 
@@ -437,20 +452,23 @@ class MyServer(Server):
                     self.numVague += 1
                     self.send_numVague()
 
+
                 for chicken in self.chicken_group:
+                    '''Chaque poulet a 1 chance sur 4000 de tirer un oeuf'''
                     egg = random.randint(1, 4000)
-                    cadeau = random.randint(1, 2000)
                     if egg == 42:
                         self.shot_group.add(Shot(1, chicken.rect.center, 's', 1))
+                    '''Chaque poulet a 1 chance sur 20000 de tirer un cadeau'''
+                    cadeau = random.randint(1, 20000)
                     if cadeau == 42:
                         self.cadeau_group.add(Cadeau(chicken.rect.center))
+
                 self.send_shots()
                 self.shot_group.update()
 
                 self.send_cadeaux()
                 self.cadeau_group.update()
-                self.send_puissaceTir()
-
+                self.send_puissanceTir()
 
             pygame.display.flip()
 

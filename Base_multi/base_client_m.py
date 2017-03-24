@@ -70,6 +70,10 @@ class GameClient(ConnectionListener):
         GameClient.puissanceTir1 = data["puissanceTir1"]
         GameClient.puissanceTir2 = data["puissanceTir2"]
 
+    def Network_gameover(self, data):
+        print('GAME OVER')
+        sys.exit()
+
 
 # CLASSES
 class Vaisseau(pygame.sprite.Sprite, ConnectionListener):
