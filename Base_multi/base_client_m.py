@@ -245,12 +245,16 @@ if __name__ == '__main__':
             vaisseau_sprite.clear(screen, background_image)
             screen.blit(background_image, background_rect)
             vaisseau_sprite.draw(screen)
+
             shot_group_joueur.clear(screen, background_image)
             shot_group_joueur.draw(screen)
-            shot_group_chicken.clear(screen, background_image)
-            shot_group_chicken.draw(screen)
+
             cadeau_group.clear(screen, background_image)
             cadeau_group.draw(screen)
+
+            shot_group_chicken.clear(screen, background_image)
+            shot_group_chicken.draw(screen)
+
             chicken_group.clear(screen, background_image)
             chicken_group.draw(screen)
 

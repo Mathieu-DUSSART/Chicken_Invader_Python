@@ -51,10 +51,10 @@ class Vaisseau(pygame.sprite.Sprite):
     def update(self, keys):
         if self.dead == False:
             if keys[K_UP] and keys[K_LEFT]:
-                if self.rect.center[1] >= 0 and self.rect.center[0] >= 0:
+                if self.rect.center[1] >= SCREEN_HEIGHT / 2 and self.rect.center[0] >= 0:
                     self.rect = self.rect.move([-7,-7])
             elif keys[K_UP] and keys[K_RIGHT]:
-                if self.rect.center[1] >= 0 and self.rect.center[0] <= SCREEN_WIDTH:
+                if self.rect.center[1] >= SCREEN_HEIGHT / 2 and self.rect.center[0] <= SCREEN_WIDTH:
                     self.rect = self.rect.move([7,-7])
             elif keys[K_DOWN] and keys[K_RIGHT]:
                 if self.rect.center[1] <= SCREEN_HEIGHT and self.rect.center[0] <= SCREEN_WIDTH:
@@ -63,7 +63,7 @@ class Vaisseau(pygame.sprite.Sprite):
                 if self.rect.center[1] <= SCREEN_HEIGHT and self.rect.center[0] >= 0:
                     self.rect = self.rect.move([-7,7])
             elif keys[K_UP]:
-                if self.rect.center[1] >= 0:
+                if self.rect.center[1] >= SCREEN_HEIGHT / 2:
                     self.rect = self.rect.move([0,-10])
             elif keys[K_DOWN]:
                 if self.rect.center[1] <= SCREEN_HEIGHT:
